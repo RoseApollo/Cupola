@@ -50,7 +50,7 @@ namespace Cupola
             }
         }
 
-        public static async Task<Bitmap> Combine(Bitmap[] images)
+        public static async Task<Bitmap> Combine(Bitmap[] images, float oldWeight = 0f)
         {
             int width = images[0].Width;
             int height = images[0].Height;
@@ -63,7 +63,9 @@ namespace Cupola
 
             Bitmap final = new Bitmap(width, height);
 
-            Task<Color>[,] result = new Task<Color>[width, height];
+            Task<Color>[,] resultBright = new Task<Color>[width, height];
+            Task<Color>[,] resultBlend = new Task<Color>[width, height];
+
 
             for (int x = 0; x < width; x++)
             {
@@ -74,7 +76,11 @@ namespace Cupola
                     for (int i = 0; i < potentialColors.Length; i++)
                         potentialColors[i] = images[i].GetPixel(x, y);
 
-                    result[x, y] = GetBrighter(potentialColors);
+                    if (oldWeight < 1f)
+                        resultBright[x, y] = GetBrighter(potentialColors);
+
+                    if (oldWeight > 0f)
+                        resultBlend[x, y] = GetAverage(potentialColors);
                 }
             }
 
@@ -82,7 +88,19 @@ namespace Cupola
             {
                 for (int y = 0; y < height; y++)
                 {
-                    final.SetPixel(x, y, await result[x, y]);
+                    Color brightColor = new Color();
+                    Color blendColor = new Color();
+                    Color finalColor = new Color();
+
+                    if (oldWeight < 1f)
+                        brightColor = await resultBright[x, y];
+
+                    if (oldWeight > 0f)
+                        blendColor = await resultBlend[x, y];
+
+                    finalColor = await GetBlend(brightColor, blendColor, oldWeight);
+
+                    final.SetPixel(x, y, finalColor);
                 }
             }
 
@@ -129,7 +147,7 @@ namespace Cupola
 
         public static async Task<Color> GetBlend(Color color1, Color color2, float weight)
         {
-            return Color.FromArgb(255, (int)(((weight) * color1.R) + ((1 - weight) * color2.R)), (int)(((weight) * color1.G) + ((1 - weight) * color2.G)), (int)(((weight) * color1.B) + ((1 - weight) * color2.B));
+            return Color.FromArgb(255, (int)(((weight) * color1.R) + ((1 - weight) * color2.R)), (int)(((weight) * color1.G) + ((1 - weight) * color2.G)), (int)(((weight) * color1.B) + ((1 - weight) * color2.B)));
         }
     }
 }
