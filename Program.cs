@@ -32,7 +32,7 @@ namespace Cupola
 
             if (Console.ReadKey().Key == ConsoleKey.S)
             {
-                Bitmap bout = await Combine(images.ToArray());
+                Bitmap bout = await Combine(images.ToArray(), 1f);
                 bout.Save(name + ".png");
             }
             else
@@ -45,12 +45,12 @@ namespace Cupola
 
                     Console.WriteLine(i.ToString());
 
-                    previousBit = await Combine(new Bitmap[] { previousBit, images[i] });
+                    previousBit = await Combine(new Bitmap[] { previousBit, images[i] }, 1f);
                 }
             }
         }
 
-        public static async Task<Bitmap> Combine(Bitmap[] images, float oldWeight = 0f)
+        public static async Task<Bitmap> Combine(Bitmap[] images, float oldWeight = 1f) // default to brightest
         {
             int width = images[0].Width;
             int height = images[0].Height;
@@ -76,10 +76,10 @@ namespace Cupola
                     for (int i = 0; i < potentialColors.Length; i++)
                         potentialColors[i] = images[i].GetPixel(x, y);
 
-                    if (oldWeight < 1f)
+                    if (oldWeight > 0f)
                         resultBright[x, y] = GetBrighter(potentialColors);
 
-                    if (oldWeight > 0f)
+                    if (oldWeight < 1f)
                         resultBlend[x, y] = GetAverage(potentialColors);
                 }
             }
@@ -92,10 +92,10 @@ namespace Cupola
                     Color blendColor = new Color();
                     Color finalColor = new Color();
 
-                    if (oldWeight < 1f)
+                    if (oldWeight > 0f)
                         brightColor = await resultBright[x, y];
 
-                    if (oldWeight > 0f)
+                    if (oldWeight < 1f)
                         blendColor = await resultBlend[x, y];
 
                     finalColor = await GetBlend(brightColor, blendColor, oldWeight);
@@ -142,12 +142,25 @@ namespace Cupola
                 blue += colors[i].B;
             }
 
-            return Color.FromArgb(255, red / colors.Length, green / colors.Length, blue / colors.Length);
+            red = red / colors.Length;
+            green = green / colors.Length;
+            blue = blue / colors.Length;
+
+            if (red > 255)
+                red = 255;
+
+            if (green > 255)
+                green = 255;
+
+            if (blue > 255)
+                blue = 255;
+
+            return Color.FromArgb(red, green, blue);
         }
 
         public static async Task<Color> GetBlend(Color color1, Color color2, float weight)
         {
-            return Color.FromArgb(255, (int)(((weight) * color1.R) + ((1 - weight) * color2.R)), (int)(((weight) * color1.G) + ((1 - weight) * color2.G)), (int)(((weight) * color1.B) + ((1 - weight) * color2.B)));
+            return Color.FromArgb((int)(((weight) * color1.R) + ((1 - weight) * color2.R)), (int)(((weight) * color1.G) + ((1 - weight) * color2.G)), (int)(((weight) * color1.B) + ((1 - weight) * color2.B)));
         }
     }
 }
