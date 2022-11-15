@@ -32,16 +32,21 @@ namespace Cupola
 
             if (Console.ReadKey().Key == ConsoleKey.S)
             {
-                Bitmap bout = await Combine(images.ToArray(), 1f);
-                bout.Save(name + ".png");
+                Bitmap final = await Combine(images.ToArray(), 0.6f);
+
+                final.Save(name + ".png");
             }
             else
             {
                 Bitmap previousBit = images[0];
 
+                List<Bitmap> oldBitmaps = new List<Bitmap>();
+
                 for (int i = 1; i < images.Count; i++)
                 {
-                    previousBit.Save(name + (i - 1).ToString());
+                    oldBitmaps.Add(previousBit);
+
+                    previousBit.Save(name + "-" + (i - 1).ToString() + ".png");
 
                     Console.WriteLine(i.ToString());
 
