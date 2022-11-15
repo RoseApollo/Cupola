@@ -42,15 +42,19 @@ namespace Cupola
 
                 List<Bitmap> oldBitmaps = new List<Bitmap>();
 
+                oldBitmaps.Add(previousBit);
+
                 for (int i = 1; i < images.Count; i++)
                 {
-                    oldBitmaps.Add(previousBit);
-
                     previousBit.Save(name + "-" + (i - 1).ToString() + ".png");
 
                     Console.WriteLine(i.ToString());
 
                     previousBit = await Combine(new Bitmap[] { previousBit, images[i] }, 1f);
+
+                    oldBitmaps.Add(previousBit);
+
+                    previousBit = await Combine(oldBitmaps.ToArray(), 0.6f); // PERFORMANCE
                 }
             }
         }
