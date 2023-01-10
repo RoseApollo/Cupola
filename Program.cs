@@ -30,13 +30,15 @@ namespace Cupola
 
             Console.WriteLine("mode?");
 
-            if (Console.ReadKey().Key == ConsoleKey.S)
+            ConsoleKey keyGG = Console.ReadKey().Key;
+
+            if (keyGG == ConsoleKey.S)
             {
                 Bitmap final = await Combine(images.ToArray(), 0.6f);
 
                 final.Save(name + ".png");
             }
-            else
+            else if (keyGG == ConsoleKey.M)
             {
                 Dictionary<string, Task<Bitmap>> log = new Dictionary<string, Task<Bitmap>>();
 
@@ -55,6 +57,19 @@ namespace Cupola
 
                     img.Save(logItem.Key);
                 }
+            }
+            else if (keyGG == ConsoleKey.F)
+            {
+                FloatImage[] fImages = new FloatImage[images.Count];
+
+                for (int i = 0; i < images.Count; i++)
+                {
+                    fImages[i] = new FloatImage(images[i]);
+                }
+
+                Bitmap final = FloatImage.Blend(fImages, true).ToBitmap();
+
+                final.Save(name + ".png");
             }
         }
 
@@ -198,7 +213,7 @@ namespace Cupola
                     green = (byte)Math.Clamp((int)this.green, 0, 256);
                     blue = (byte)Math.Clamp((int)this.blue, 0, 256);
 
-                    return Color.FromArgb(0, red, green, blue);
+                    return Color.FromArgb(red, green, blue);
                 }
 
                 public static void Spread(FloatColor[] colors, ref float minus, ref float multiply)
@@ -323,10 +338,13 @@ namespace Cupola
                             pixel.blue += pixTemp.blue;
                         }
 
-                        pixel.red = pixel.red / images.Length;
-                        pixel.green = pixel.green / images.Length;
-                        pixel.blue = pixel.blue / images.Length;
-
+                        if (!spread)
+                        {
+                            pixel.red = pixel.red / images.Length;
+                            pixel.green = pixel.green / images.Length;
+                            pixel.blue = pixel.blue / images.Length;
+                        }
+                        
                         output.SetPixel(x, y, pixel);
                     }
                 }
