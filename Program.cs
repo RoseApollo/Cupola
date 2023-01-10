@@ -271,6 +271,21 @@ namespace Cupola
                 this.pixels[x, y] = color;
             }
 
+            public Bitmap ToBitmap()
+            {
+                Bitmap output = new Bitmap((int)this.width, (int)this.height);
+
+                for (int x = 0; x < width; x++)
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        output.SetPixel(x, y, pixels[x, y].Export());
+                    }
+                }
+
+                return output;
+            }
+
             public static void Spread(FloatImage[] images, ref float minus, ref float multiply)
             {
                 FloatColor[] colors = new FloatColor[images[0].width * images[0].height * images.Length];
