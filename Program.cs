@@ -367,7 +367,7 @@ namespace Cupola
                             pixel.blue = (pixel.blue - minus) * multiply;
 
                             output.SetPixel(x, y, pixel);
-                        }
+                        }//hi
                     }
                 }
 
