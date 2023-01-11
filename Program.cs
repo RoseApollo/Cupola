@@ -76,6 +76,27 @@ namespace Cupola
                 Console.WriteLine("SAVE");
                 final.Save(name + ".png");
             }
+            else if (keyGG == ConsoleKey.V)
+            {
+                FloatImage previous = new FloatImage(images[0]);
+
+                for (int i = 1; i < images.Count; i++)
+                {
+                    Console.WriteLine(i.ToString());
+
+                    previous.ToBitmap().Save(name + i.ToString() + ".png");
+
+                    Console.Write("b");
+                    FloatImage blend = FloatImage.Blend(new FloatImage[] { previous, new FloatImage(images[i]) }, true);
+                    Console.Write("h");
+                    FloatImage height = FloatImage.Highest(new FloatImage[] { previous, new FloatImage(images[i]) });
+
+                    Console.Write("a");
+                    previous = FloatImage.Blend(new FloatImage[] { blend, height }, true);
+                }
+
+                previous.ToBitmap().Save(name + images.Count.ToString() + ".png");
+            }
         }
 
         public static async Task<Bitmap> Combine(Bitmap[] images, float oldWeight = 1f) // default to brightest
