@@ -1,6 +1,4 @@
-﻿using System;
-using System.Drawing;
-using System.IO;
+﻿using System.Drawing;
 
 namespace Cupola
 {
@@ -216,6 +214,11 @@ namespace Cupola
                     return Color.FromArgb(red, green, blue);
                 }
 
+                public float Brightness()
+                {
+                    return this.red + this.green + this.blue;
+                }
+
                 public static void Spread(FloatColor[] colors, ref float minus, ref float multiply)
                 {
                     List<float> allColors = new List<float>();
@@ -344,7 +347,7 @@ namespace Cupola
                             pixel.green = pixel.green / images.Length;
                             pixel.blue = pixel.blue / images.Length;
                         }
-                        
+
                         output.SetPixel(x, y, pixel);
                     }
                 }
@@ -368,6 +371,31 @@ namespace Cupola
 
                             output.SetPixel(x, y, pixel);
                         }//hi
+                    }
+                }
+
+                return output;
+            }
+
+            public static FloatImage Highest(FloatImage[] images)
+            {
+                FloatImage output = new FloatImage(images[0].width, images[0].height);
+
+                for (int x = 0; x < images[0].width; x++)
+                {
+                    for (int y = 0; y < images[0].height; y++)
+                    {
+                        FloatColor brightest = new FloatColor(Color.Black);
+
+                        for (int i = 0; i < images.Length)
+                        {
+                            if (images[i].pixels[x, y].Brightness() > brightest.Brightness())
+                            {
+                                brightest = images[i].pixels[x, y];
+                            }
+                        }
+
+                        output.SetPixel(x, y, brightest);
                     }
                 }
 
