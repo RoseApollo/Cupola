@@ -65,8 +65,15 @@ namespace Cupola
                     fImages[i] = new FloatImage(images[i]);
                 }
 
-                Bitmap final = FloatImage.Blend(fImages, true).ToBitmap();
+                Console.WriteLine("BLEND");
+                FloatImage blend = FloatImage.Blend(fImages, true);
+                Console.WriteLine("HEIHGT");
+                FloatImage height = FloatImage.Highest(fImages);
 
+                Console.WriteLine("FINAL");
+                Bitmap final = FloatImage.Blend(new FloatImage[] { blend, height }, true).ToBitmap();
+
+                Console.WriteLine("SAVE");
                 final.Save(name + ".png");
             }
         }
