@@ -387,7 +387,7 @@ namespace Cupola
                     {
                         FloatColor brightest = new FloatColor(Color.Black);
 
-                        for (int i = 0; i < images.Length)
+                        for (int i = 0; i < images.Length; i++)
                         {
                             if (images[i].pixels[x, y].Brightness() > brightest.Brightness())
                             {
