@@ -87,14 +87,14 @@ namespace Cupola
 
                     previous.ToBitmap().Save(name + i.ToString() + ".png");
 
-                    
+
                     Task<FloatImage> blend = FloatImage.Blend(new FloatImage[] { previous, new FloatImage(images[i]) }, true);
                     Task<FloatImage> height = FloatImage.Highest(new FloatImage[] { brightest, new FloatImage(images[i]) });
 
                     FloatImage blendImage = await blend;
                     FloatImage heightImage = await height;
                     brightest = heightImage;
-                       
+
                     Console.Write("a");
                     previous = await FloatImage.Blend(new FloatImage[] { blendImage, heightImage }, true);
                 }
