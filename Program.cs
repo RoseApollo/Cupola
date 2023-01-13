@@ -27,6 +27,7 @@ namespace Cupola
             string name = Console.ReadLine();
 
             Console.WriteLine("mode?");
+            Console.WriteLine();
 
             ConsoleKey keyGG = Console.ReadKey().Key;
 
@@ -57,7 +58,7 @@ namespace Cupola
 
                 for (int i = 1; i < images.Count; i++)
                 {
-                    Console.WriteLine(i.ToString());
+                    Console.Write(i.ToString());
 
                     previous.ToBitmap().Save(name + i.ToString() + ".png");
 
@@ -71,6 +72,8 @@ namespace Cupola
 
                     Console.Write("a");
                     previous = await FloatImage.Blend(new FloatImage[] { blendImage, heightImage }, true);
+                    
+                    Console.WriteLine();
                 }
 
                 previous.ToBitmap().Save(name + images.Count.ToString() + ".png");
