@@ -66,12 +66,12 @@ namespace Cupola
                 }
 
                 Console.WriteLine("BLEND");
-                FloatImage blend = FloatImage.Blend(fImages, true);
+                FloatImage blend = await FloatImage.Blend(fImages, true);
                 Console.WriteLine("HEIHGT");
-                FloatImage height = FloatImage.Highest(fImages);
+                FloatImage height = await FloatImage.Highest(fImages);
 
                 Console.WriteLine("FINAL");
-                Bitmap final = FloatImage.Blend(new FloatImage[] { blend, height }, true).ToBitmap();
+                Bitmap final = (await FloatImage.Blend(new FloatImage[] { blend, height }, true)).ToBitmap();
 
                 Console.WriteLine("SAVE");
                 final.Save(name + ".png");
@@ -79,6 +79,7 @@ namespace Cupola
             else if (keyGG == ConsoleKey.V)
             {
                 FloatImage previous = new FloatImage(images[0]);
+                FloatImage brightest = new FloatImage(images[0]);
 
                 for (int i = 1; i < images.Count; i++)
                 {
@@ -86,13 +87,16 @@ namespace Cupola
 
                     previous.ToBitmap().Save(name + i.ToString() + ".png");
 
-                    Console.Write("b");
-                    FloatImage blend = FloatImage.Blend(new FloatImage[] { previous, new FloatImage(images[i]) }, true);
-                    Console.Write("h");
-                    FloatImage height = FloatImage.Highest(new FloatImage[] { previous, new FloatImage(images[i]) });
+                    
+                    Task<FloatImage> blend = FloatImage.Blend(new FloatImage[] { previous, new FloatImage(images[i]) }, true);
+                    Task<FloatImage> height = FloatImage.Highest(new FloatImage[] { brightest, new FloatImage(images[i]) });
 
+                    FloatImage blendImage = await blend;
+                    FloatImage heightImage = await height;
+                    brightest = heightImage;
+                       
                     Console.Write("a");
-                    previous = FloatImage.Blend(new FloatImage[] { blend, height }, true);
+                    previous = await FloatImage.Blend(new FloatImage[] { blendImage, heightImage }, true);
                 }
 
                 previous.ToBitmap().Save(name + images.Count.ToString() + ".png");
@@ -350,7 +354,7 @@ namespace Cupola
                 FloatColor.Spread(colors, ref minus, ref multiply);
             }
 
-            public static FloatImage Blend(FloatImage[] images, bool spread = false)
+            public static async Task<FloatImage> Blend(FloatImage[] images, bool spread = false)
             {
                 FloatImage output = new FloatImage(images[0].width, images[0].height);
 
@@ -402,10 +406,12 @@ namespace Cupola
                     }
                 }
 
+                Console.Write("b");
+
                 return output;
             }
 
-            public static FloatImage Highest(FloatImage[] images)
+            public static async Task<FloatImage> Highest(FloatImage[] images)
             {
                 FloatImage output = new FloatImage(images[0].width, images[0].height);
 
@@ -426,6 +432,8 @@ namespace Cupola
                         output.SetPixel(x, y, brightest);
                     }
                 }
+
+                Console.Write("h");
 
                 return output;
             }
