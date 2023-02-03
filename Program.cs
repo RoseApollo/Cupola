@@ -125,8 +125,8 @@ namespace Cupola
                 float3 i1 = input1[ThreadIds.XY].RGB;
                 float3 i2 = input2[ThreadIds.XY].RGB;
 
-                float i1Intensity = i1.X * i1.Y * i1.Z;
-                float i2Intensity = i2.X * i2.Y * i2.Z;
+                float i1Intensity = (i1.X * i1.X) + (i1.Y * i1.Y) + (i1.Z * i1.Z);
+                float i2Intensity = (i2.X * i2.X) + (i2.Y * i2.Y) + (i2.Z * i2.Z);
 
                 if (i1Intensity > i2Intensity)
                 {
