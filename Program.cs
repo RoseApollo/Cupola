@@ -1,305 +1,139 @@
-﻿using System.Drawing;
+﻿using ComputeSharp;
+using static Cupola.Program;
 
 namespace Cupola
 {
-    internal class Program
+    internal partial class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
-            List<Bitmap> images = new List<Bitmap>();
-
             Console.WriteLine("Image Dir?");
-            string fileLoc = Console.ReadLine();
+            string? fileLoc = Console.ReadLine();
 
             if (fileLoc == null)
                 throw new ArgumentException("input should not be NULL");
 
             string[] files = Directory.GetFiles(fileLoc);
 
+            ReadWriteTexture2D<Bgra32, float4>[] images = new ReadWriteTexture2D<Bgra32, Float4>[files.Length];
+
             for (int i = 0; i < files.Length; i++)
             {
                 Console.WriteLine(files[i]);
-                images.Add(new Bitmap(files[i]));
+                images[i] = GraphicsDevice.GetDefault().LoadReadWriteTexture2D<Bgra32, float4>(files[i]);
             }
 
             Console.WriteLine("Output: ");
 
-            string name = Console.ReadLine();
+            string? name = Console.ReadLine();
+
+            if (name == null)
+                throw new Exception("UwU");
 
             Console.WriteLine("mode?");
             Console.WriteLine();
+            ConsoleKey key = Console.ReadKey().Key;
 
-            ConsoleKey keyGG = Console.ReadKey().Key;
-
-            if (keyGG == ConsoleKey.F)
+            if (key == ConsoleKey.P)
             {
-                FloatImage[] fImages = new FloatImage[images.Count];
+                ReadWriteTexture2D<Bgra32, Float4> brightest = images[0];
+                ReadWriteTexture2D<Bgra32, Float4> output = images[0];
 
-                for (int i = 0; i < images.Count; i++)
+                for (int i = 1; i < images.Length; i++)
                 {
-                    fImages[i] = new FloatImage(images[i]);
+                    Console.WriteLine(i.ToString());
+
+                    ReadWriteTexture2D<Bgra32, Float4> temp = images[i];
+
+                    GraphicsDevice.GetDefault().For
+                    (
+                        temp.Width,
+                        temp.Height,
+                        new Brightest(brightest, temp)
+                    );
+
+                    GraphicsDevice.GetDefault().For
+                    (
+                        temp.Width,
+                        temp.Height,
+                        new Average(temp, output)
+                    );
+
+                    GraphicsDevice.GetDefault().For
+                    (
+                        temp.Width,
+                        temp.Height,
+                        new Average(temp, brightest)
+                    );
+
+                    output = temp;
                 }
 
-                Console.WriteLine("BLEND");
-                FloatImage blend = await FloatImage.Blend(fImages, true);
-                Console.WriteLine("HEIHGT");
-                FloatImage height = await FloatImage.Highest(fImages);
-
-                Console.WriteLine("FINAL");
-                Bitmap final = (await FloatImage.Blend(new FloatImage[] { blend, height }, true)).ToBitmap();
-
-                Console.WriteLine("SAVE");
-                final.Save(name + ".png");
+                output.Save(name + ".jpg");
             }
-            else if (keyGG == ConsoleKey.V)
+            else
             {
-                FloatImage previous = new FloatImage(images[0]);
-                FloatImage brightest = new FloatImage(images[0]);
+                ReadWriteTexture2D<Bgra32, Float4> i1 = images[0];
+                ReadWriteTexture2D<Bgra32, Float4> i2 = images[1];
 
-                for (int i = 1; i < images.Count; i++)
-                {
-                    Console.Write(i.ToString());
+                GraphicsDevice.GetDefault().For
+                (
+                    i1.Width,
+                    i1.Height,
+                    new Average(i1, i2)
+                );
 
-                    previous.ToBitmap().Save(name + i.ToString() + ".png");
-
-
-                    Task<FloatImage> blend = FloatImage.Blend(new FloatImage[] { previous, new FloatImage(images[i]) }, true);
-                    Task<FloatImage> height = FloatImage.Highest(new FloatImage[] { brightest, new FloatImage(images[i]) });
-
-                    FloatImage blendImage = await blend;
-                    FloatImage heightImage = await height;
-                    brightest = heightImage;
-
-                    Console.Write("a");
-                    previous = await FloatImage.Blend(new FloatImage[] { blendImage, heightImage }, true);
-                    
-                    Console.WriteLine();
-                }
-
-                previous.ToBitmap().Save(name + images.Count.ToString() + ".png");
+                i1.Save(name + ".jpg");
             }
         }
 
-        public class FloatImage
+        [AutoConstructor]
+        public readonly partial struct Brightest : IComputeShader
         {
-            public class FloatColor
+            public readonly IReadWriteNormalizedTexture2D<float4> input1;
+            public readonly IReadWriteNormalizedTexture2D<float4> input2;
+
+            // Other captured resources or values here...
+
+            public void Execute()
             {
-                public float red;
-                public float green;
-                public float blue;
+                float3 i1 = input1[ThreadIds.XY].RGB;
+                float3 i2 = input2[ThreadIds.XY].RGB;
 
-                public FloatColor(Color color)
+                float i1Intensity = i1.X * i1.Y * i1.Z;
+                float i2Intensity = i2.X * i2.Y * i2.Z;
+
+                if (i1Intensity > i2Intensity)
                 {
-                    this.red = (float)color.R;
-                    this.green = (float)color.G;
-                    this.blue = (float)color.B;
+                    input1[ThreadIds.XY].RGB = i1;
                 }
-
-                public Color Export()
+                else
                 {
-                    this.red = MathF.Round(this.red);
-                    this.green = MathF.Round(this.green);
-                    this.blue = MathF.Round(this.blue);
-
-                    byte red, green, blue;
-
-                    red = (byte)Math.Clamp((int)this.red, 0, 256);
-                    green = (byte)Math.Clamp((int)this.green, 0, 256);
-                    blue = (byte)Math.Clamp((int)this.blue, 0, 256);
-
-                    return Color.FromArgb(red, green, blue);
-                }
-
-                public float Brightness()
-                {
-                    return this.red + this.green + this.blue;
-                }
-
-                public static void Spread(FloatColor[] colors, ref float minus, ref float multiply)
-                {
-                    List<float> allColors = new List<float>();
-
-                    foreach (FloatColor color in colors)
-                    {
-                        allColors.Add(color.red);
-                        allColors.Add(color.blue);
-                        allColors.Add(color.green);
-                    }
-
-                    float min = 0;
-                    float max = 0;
-
-                    foreach (float aColor in allColors)
-                    {
-                        if (aColor < min)
-                            min = aColor;
-                        else if (aColor > max)
-                            max = aColor;
-                    }
-
-                    minus = min;
-
-                    multiply = 255f / (max - minus);
+                    input1[ThreadIds.XY].RGB = i2;
                 }
             }
+        }
 
-            public uint width { get; private set; }
-            public uint height { get; private set; }
+        [AutoConstructor]
+        public readonly partial struct Average : IComputeShader
+        {
+            public readonly IReadWriteNormalizedTexture2D<float4> input1;
+            public readonly IReadWriteNormalizedTexture2D<float4> input2;
 
-            public FloatColor[,] pixels { get; private set; }
+            // Other captured resources or values here...
 
-            public FloatImage(uint width, uint height)
+            public void Execute()
             {
-                this.width = width;
-                this.height = height;
+                float3 i1 = input1[ThreadIds.XY].RGB;
+                float3 i2 = input2[ThreadIds.XY].RGB;
 
-                this.pixels = new FloatColor[width, height];
+                float3 o1 = 0;
 
-                for (int x = 0; x < this.width; x++)
-                {
-                    for (int y = 0; y < this.height; y++)
-                    {
-                        this.pixels[x, y] = new FloatColor(Color.Black);
-                    }
-                }
-            }
+                o1.X = (i1.X + i2.X) / 2;
+                o1.Y = (i1.Y + i2.Y) / 2;
+                o1.Z = (i1.Z + i2.Z) / 2;
 
-            public FloatImage(Bitmap bitmap)
-            {
-                this.width = (uint)bitmap.Width;
-                this.height = (uint)bitmap.Height;
-
-                this.pixels = new FloatColor[this.width, this.height];
-
-                for (int x = 0; x < this.width; x++)
-                {
-                    for (int y = 0; y < this.height; y++)
-                    {
-                        this.pixels[x, y] = new FloatColor(bitmap.GetPixel(x, y));
-                    }
-                }
-            }
-
-            public void SetPixel(int x, int y, FloatColor color)
-            {
-                this.pixels[x, y] = color;
-            }
-
-            public Bitmap ToBitmap()
-            {
-                Bitmap output = new Bitmap((int)this.width, (int)this.height);
-
-                for (int x = 0; x < width; x++)
-                {
-                    for (int y = 0; y < height; y++)
-                    {
-                        output.SetPixel(x, y, pixels[x, y].Export());
-                    }
-                }
-
-                return output;
-            }
-
-            public static void Spread(FloatImage[] images, ref float minus, ref float multiply)
-            {
-                FloatColor[] colors = new FloatColor[images[0].width * images[0].height * images.Length];
-
-                for (int i = 0; i < images.Length; i++)
-                {
-                    for (int x = 0; x < images[0].width; x++)
-                    {
-                        for (int y = 0; y < images[0].height; y++)
-                        {
-                            colors[(i * images[0].width * images[0].height) + (x * images[0].height) + y] = images[i].pixels[x, y];
-                        }
-                    }
-                }
-
-                FloatColor.Spread(colors, ref minus, ref multiply);
-            }
-
-            public static async Task<FloatImage> Blend(FloatImage[] images, bool spread = false)
-            {
-                FloatImage output = new FloatImage(images[0].width, images[0].height);
-
-                for (int x = 0; x < output.width; x++)
-                {
-                    for (int y = 0; y < output.height; y++)
-                    {
-                        FloatColor pixel = new FloatColor(Color.Black);
-
-                        for (int i = 0; i < images.Length; i++)
-                        {
-                            FloatColor pixTemp = images[i].pixels[x, y];
-
-                            pixel.red += pixTemp.red;
-                            pixel.green += pixTemp.green;
-                            pixel.blue += pixTemp.blue;
-                        }
-
-                        if (!spread)
-                        {
-                            pixel.red = pixel.red / images.Length;
-                            pixel.green = pixel.green / images.Length;
-                            pixel.blue = pixel.blue / images.Length;
-                        }
-
-                        output.SetPixel(x, y, pixel);
-                    }
-                }
-
-                if (spread)
-                {
-                    float minus = 0;
-                    float multiply = 0;
-
-                    FloatImage.Spread(new FloatImage[] { output }, ref minus, ref multiply);
-
-                    for (int x = 0; x < output.width; x++)
-                    {
-                        for (int y = 0; y < output.height; y++)
-                        {
-                            FloatColor pixel = output.pixels[x, y];
-
-                            pixel.red = (pixel.red - minus) * multiply;
-                            pixel.green = (pixel.green - minus) * multiply;
-                            pixel.blue = (pixel.blue - minus) * multiply;
-
-                            output.SetPixel(x, y, pixel);
-                        }//hi
-                    }
-                }
-
-                Console.Write("b");
-
-                return output;
-            }
-
-            public static async Task<FloatImage> Highest(FloatImage[] images)
-            {
-                FloatImage output = new FloatImage(images[0].width, images[0].height);
-
-                for (int x = 0; x < images[0].width; x++)
-                {
-                    for (int y = 0; y < images[0].height; y++)
-                    {
-                        FloatColor brightest = new FloatColor(Color.Black);
-
-                        for (int i = 0; i < images.Length; i++)
-                        {
-                            if (images[i].pixels[x, y].Brightness() > brightest.Brightness())
-                            {
-                                brightest = images[i].pixels[x, y];
-                            }
-                        }
-
-                        output.SetPixel(x, y, brightest);
-                    }
-                }
-
-                Console.Write("h");
-
-                return output;
+                input1[ThreadIds.XY].RGB = o1;
             }
         }
     }
