@@ -56,14 +56,14 @@ namespace Cupola
                     (
                         temp.Width,
                         temp.Height,
-                        new Average(temp, output)
+                        new Average(temp, output, 0.5f)
                     );
 
                     GraphicsDevice.GetDefault().For
                     (
                         temp.Width,
                         temp.Height,
-                        new Average(temp, brightest)
+                        new Average(temp, brightest, 0.6f)
                     );
 
                     output = temp;
@@ -71,19 +71,44 @@ namespace Cupola
 
                 output.Save(name + ".jpg");
             }
-            else
+            else if (key == ConsoleKey.V)
             {
-                ReadWriteTexture2D<Bgra32, Float4> i1 = images[0];
-                ReadWriteTexture2D<Bgra32, Float4> i2 = images[1];
+                ReadWriteTexture2D<Bgra32, Float4> brightest = images[0];
+                ReadWriteTexture2D<Bgra32, Float4> output = images[0];
 
-                GraphicsDevice.GetDefault().For
-                (
-                    i1.Width,
-                    i1.Height,
-                    new Average(i1, i2)
-                );
+                output.Save(name + "-" + 0.ToString() + ".jpg");
 
-                i1.Save(name + ".jpg");
+                for (int i = 1; i < images.Length; i++)
+                {
+                    Console.WriteLine(i.ToString());
+
+                    ReadWriteTexture2D<Bgra32, Float4> temp = images[i];
+
+                    GraphicsDevice.GetDefault().For
+                    (
+                        temp.Width,
+                        temp.Height,
+                        new Brightest(brightest, temp)
+                    );
+
+                    GraphicsDevice.GetDefault().For
+                    (
+                        temp.Width,
+                        temp.Height,
+                        new Average(temp, output, 0.5f)
+                    );
+
+                    GraphicsDevice.GetDefault().For
+                    (
+                        temp.Width,
+                        temp.Height,
+                        new Average(temp, brightest, 0.6f)
+                    );
+
+                    output = temp;
+
+                    output.Save(name + "-" + i.ToString() +  ".jpg");
+                }
             }
         }
 
@@ -119,19 +144,23 @@ namespace Cupola
         {
             public readonly IReadWriteNormalizedTexture2D<float4> input1;
             public readonly IReadWriteNormalizedTexture2D<float4> input2;
+            public readonly float weight;
 
             // Other captured resources or values here...
 
             public void Execute()
             {
+                float w1 = weight;
+                float w2 = 1 - weight;
+
                 float3 i1 = input1[ThreadIds.XY].RGB;
                 float3 i2 = input2[ThreadIds.XY].RGB;
 
                 float3 o1 = 0;
 
-                o1.X = (i1.X + i2.X) / 2;
-                o1.Y = (i1.Y + i2.Y) / 2;
-                o1.Z = (i1.Z + i2.Z) / 2;
+                o1.X = (i1.X * w1) + (i2.X * w2);
+                o1.Y = (i1.Y * w1) + (i2.Y * w2);
+                o1.Z = (i1.Z * w1) + (i2.Z * w2);
 
                 input1[ThreadIds.XY].RGB = o1;
             }
