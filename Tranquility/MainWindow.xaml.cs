@@ -50,7 +50,7 @@ namespace Tranquility
             return null;
         }
 
-        private void Run(object sender, RoutedEventArgs e)
+        private void RunOp(object sender, RoutedEventArgs e)
         {
             if (files == null)
                 throw new Exception("Please select files before running");

@@ -11,24 +11,16 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <Grid x:Name="Left" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Height="NaN" Margin="0,0,0,0" VerticalAlignment="Stretch" Width="NaN">
+        <Grid x:Name="Left" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Height="NaN" Margin="0,0,0,0" VerticalAlignment="Stretch" Width="NaN" RenderTransformOrigin="1.015,0.537">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="0*"/>
             </Grid.ColumnDefinitions>
             <Button x:Name="Load" Content="Load" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="35" Width="65" Click="LoadFilesClick"/>
             <TextBox x:Name="Input_Folder" Margin="80,10,10,0" TextWrapping="Wrap" Text="INPUT FOLDER" VerticalAlignment="Top" Height="35"/>
-            <TextBox x:Name="Input_Files" TextWrapping="Wrap" Text="INPUT FILES" Margin="10,50,10,10"/>
-        </Grid>
-        <Grid x:Name="Right" Grid.ColumnSpan="2" Height="NaN" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="NaN">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Button x:Name="Run" Content="Run" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="35" Width="64" Grid.Column="1" Click="Run"/>
-            <ProgressBar x:Name="Progress" Height="35" Margin="78,10,10,0" VerticalAlignment="Top" Grid.Column="1"/>
-            <Image x:Name="Preview" Grid.Column="1" Margin="12,53,12,56"/>
-            <Button x:Name="Save" Content="Save" Margin="10,0,10,10" Grid.Column="1" Height="35" VerticalAlignment="Bottom"/>
+            <TextBox x:Name="Input_Files" TextWrapping="Wrap" Text="INPUT FILES" Margin="10,50,10,50"/>
+            <Button x:Name="Run" Content="Run" Click="RunOp" Margin="10,0,0,10" HorizontalAlignment="Left" Width="65" Height="35" VerticalAlignment="Bottom"/>
+            <ProgressBar x:Name="Progress" Height="35" Margin="80,0,8,10" VerticalAlignment="Bottom"/>
         </Grid>
     </Grid>
 </Window>
