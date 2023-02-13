@@ -3,6 +3,7 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 using WinRT;
 using Cupola;
 using System.IO;
+using System;
 
 namespace Tranquility
 {
@@ -23,6 +24,16 @@ namespace Tranquility
             string file = OpenFolder();
 
             files = Directory.GetFiles(file);
+
+            string iFilesT = "";
+
+            foreach (string iFile in files)
+            {
+                iFilesT += iFile + Environment.NewLine;
+            }
+
+            Input_Folder.Text = file;
+            Input_Files.Text = iFilesT;
         }
 
         private static string? OpenFolder()
