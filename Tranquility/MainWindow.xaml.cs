@@ -4,6 +4,7 @@ using WinRT;
 using Cupola;
 using System.IO;
 using System;
+using ComputeSharp;
 
 namespace Tranquility
 {
@@ -13,7 +14,8 @@ namespace Tranquility
     public partial class MainWindow : Window
     {
         string[]? files;
-        
+        ReadWriteTexture2D<Bgra32, float4>? finalImage;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -50,7 +52,12 @@ namespace Tranquility
 
         private void Run(object sender, RoutedEventArgs e)
         {
+            if (files == null)
+                throw new Exception("Please select files before running");
 
+            ReadWriteTexture2D<Bgra32, float4>[] images = Cupola.Cupola.Load(files);
+
+            finalImage = Cupola.Cupola.RunSingle(images);
         }
     }
 }

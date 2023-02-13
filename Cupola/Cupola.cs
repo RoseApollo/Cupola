@@ -2,7 +2,8 @@
 
 namespace Cupola
 {
-    internal partial class Program
+    public partial class Cupola
+
     {
         public static void RunSingle(string imgDir, string outDir)
         {
