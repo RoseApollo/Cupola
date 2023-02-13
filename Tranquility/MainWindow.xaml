@@ -19,8 +19,12 @@
             <Button x:Name="Load" Content="Load" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="35" Width="65" Click="LoadFilesClick"/>
             <TextBox x:Name="Input_Folder" Margin="80,10,10,0" TextWrapping="Wrap" Text="INPUT FOLDER" VerticalAlignment="Top" Height="35" IsReadOnly="True"/>
             <TextBox x:Name="Input_Files" TextWrapping="Wrap" Text="INPUT FILES" Margin="10,50,10,50" IsReadOnly="True"/>
-            <Button x:Name="Run" Content="Run" Click="RunOp" Margin="10,0,0,10" HorizontalAlignment="Left" Width="65" Height="35" VerticalAlignment="Bottom"/>
-            <ProgressBar x:Name="Progress" Height="35" Margin="80,0,8,10" VerticalAlignment="Bottom"/>
+            <Button x:Name="Run" Content="Run" Click="RunOp" Margin="80,0,0,10" Height="35" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="65"/>
+            <ProgressBar x:Name="Progress" Height="35" Margin="150,0,8,10" VerticalAlignment="Bottom"/>
+            <ComboBox x:Name="Options" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="65" Height="35" SelectedIndex="0">
+                <ListBoxItem Content="Picture" VerticalAlignment="Center"/>
+                <ListBoxItem Content="Video" VerticalAlignment="Center"/>
+            </ComboBox>
         </Grid>
     </Grid>
 </Window>
