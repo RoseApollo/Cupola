@@ -1,6 +1,8 @@
 ﻿using System.Windows;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using WinRT;
+using Cupola;
+using System.IO;
 
 namespace Tranquility
 {
@@ -9,6 +11,8 @@ namespace Tranquility
     /// </summary>
     public partial class MainWindow : Window
     {
+        string[]? files;
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -16,7 +20,9 @@ namespace Tranquility
 
         private void LoadFilesClick(object sender, RoutedEventArgs e)
         {
-            string file = OpenFolder();   
+            string file = OpenFolder();
+
+            files = Directory.GetFiles(file);
         }
 
         private static string? OpenFolder()

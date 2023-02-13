@@ -1,7 +1,4 @@
 ﻿using ComputeSharp;
-using System.Xml.Linq;
-using Windows.Devices.Geolocation;
-using static Cupola.Program;
 
 namespace Cupola
 {
@@ -110,10 +107,15 @@ namespace Cupola
             return outputImages;
         }
 
-        private static ReadWriteTexture2D<Bgra32, float4>[] Load(string dir)
+        public static ReadWriteTexture2D<Bgra32, float4>[] Load(string dir)
         {
             string[] files = Directory.GetFiles(dir);
 
+            return Load(files);
+        }
+
+        public static ReadWriteTexture2D<Bgra32, float4>[] Load(string[] files)
+        {
             ReadWriteTexture2D<Bgra32, float4>[] images = new ReadWriteTexture2D<Bgra32, Float4>[files.Length];
 
             for (int i = 0; i < files.Length; i++)
