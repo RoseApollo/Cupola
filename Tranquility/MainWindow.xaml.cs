@@ -14,7 +14,6 @@ namespace Tranquility
     public partial class MainWindow : Window
     {
         string[]? files;
-        ReadWriteTexture2D<Bgra32, float4>? finalImage;
 
         public MainWindow()
         {
@@ -55,27 +54,53 @@ namespace Tranquility
             if (files == null)
                 throw new Exception("Please select files before running");
 
+            int opt; // 0 - Picture, 1 - Video
+
+            opt = Options.SelectedIndex;
+
             Progress.Value = 10;
 
             ReadWriteTexture2D<Bgra32, float4>[] images = Cupola.Cupola.Load(files);
 
             Progress.Value = 30;
 
-            finalImage = Cupola.Cupola.RunSingle(images);
+            if (opt == 0)
+            {
+                ReadWriteTexture2D<Bgra32, float4> finalImage = Cupola.Cupola.RunSingle(images);
 
-            Progress.Value = 90;
+                Progress.Value = 90;
 
-            CommonSaveFileDialog saveFileDialog = new CommonSaveFileDialog();
-            saveFileDialog.DefaultExtension = ".jpg";
-            saveFileDialog.EnsurePathExists = true;
-            CommonFileDialogResult result = saveFileDialog.ShowDialog();
+                CommonSaveFileDialog saveFileDialog = new CommonSaveFileDialog();
+                saveFileDialog.DefaultExtension = ".jpg";
+                saveFileDialog.EnsurePathExists = true;
+                CommonFileDialogResult result = saveFileDialog.ShowDialog();
 
-            if (result != CommonFileDialogResult.Ok)
-                throw new Exception("please set location valid OKAY");
+                if (result != CommonFileDialogResult.Ok)
+                    throw new Exception("please set location valid OKAY");
 
-            finalImage.Save(saveFileDialog.FileName);
+                finalImage.Save(saveFileDialog.FileName);
 
-            Progress.Value = 100;
+                Progress.Value = 100;
+            }
+            else if (opt == 1)
+            {
+                ReadWriteTexture2D<Bgra32, float4>[] finalImages = Cupola.Cupola.RunMulti(images);
+
+                Progress.Value = 90;
+
+                string save = OpenFolder();
+
+                for (int i = 0; i < finalImages.Length; i++)
+                {
+                    finalImages[i].Save(save + "\\" + i.ToString() + ".jpg");
+                }
+            }
+            else
+            {
+                throw new Exception("invalid option please die");
+            }
+
+            
         }
     }
 }

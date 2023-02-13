@@ -71,7 +71,7 @@ namespace Cupola
             ReadWriteTexture2D<Bgra32, Float4> brightest = images[0];
             ReadWriteTexture2D<Bgra32, Float4> output = images[0];
 
-            outputImages[0] = output;
+            outputImages[0] = images[0];
 
             for (int i = 1; i < images.Length; i++)
             {
