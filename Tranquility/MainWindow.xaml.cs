@@ -47,5 +47,10 @@ namespace Tranquility
 
             return null;
         }
+
+        private void Run(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

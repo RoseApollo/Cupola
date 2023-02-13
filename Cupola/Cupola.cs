@@ -51,7 +51,7 @@ namespace Cupola
             return output;
         }
 
-        static void RunMulti(string imgDir, string outDir)
+        public static void RunMulti(string imgDir, string outDir)
         {
             ReadWriteTexture2D<Bgra32, float4>[] images = Load(imgDir);
 
