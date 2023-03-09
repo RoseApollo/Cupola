@@ -6,4 +6,4 @@ unfortunatly this only runs on windows, since computesharp utilizes the DirectX 
 
 Cupola - API
 
-Tranquility - WPF app to use Cupola with a nice GUI
+Tranquility - WPF app to use Cupola with a nice GUI (tranquility is probably gonna be moved into a seperate repo at some point)
